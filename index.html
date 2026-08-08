@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWHUB — Keyless MM2 Script</title>
+    <meta name="theme-color" content="#0a0a1f">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .hero-bg { background: linear-gradient(135deg, #0a0a1f, #1a1a3a, #0f172a); }
+        .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(167, 139, 250, 0.25); }
+        .glow { box-shadow: 0 0 40px rgba(167, 139, 250, 0.5); }
+        .code-box { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen" onload="showWelcome()">
+    <!-- Top Nav -->
+    <nav class="fixed top-0 w-full z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center font-bold text-lg">AW</div>
+                <span class="font-bold text-2xl tracking-tighter">AWHUB</span>
+            </div>
+            <div class="flex items-center gap-8 text-sm font-medium">
+                <a href="#" class="hover:text-violet-400 transition">Home</a>
+                <a href="#features" class="hover:text-violet-400 transition">Features</a>
+                <a href="#script" class="hover:text-violet-400 transition">Script</a>
+                <a href="#help" class="hover:text-violet-400 transition">Help / TOS</a>
+                <a href="#community" class="hover:text-violet-400 transition">Discord</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-bg min-h-screen flex items-center pt-20">
+        <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8">
+                <div class="inline-flex items-center gap-3 px-5 py-2 bg-white/5 rounded-3xl border border-white/10">
+                    <span class="text-emerald-400 text-xl">●</span>
+                    <span class="font-medium">Keyless • 0 Delay • Anti-fling • Auto-rejoin</span>
+                </div>
+                <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
+                    AWHUB
+                </h1>
+                <p class="text-xl text-zinc-300 leading-relaxed">
+                    The best keyless Murder Mystery 2 auto farm script.<br>
+                    Copy, execute, and farm — no keys, no friction.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#script" class="inline-flex items-center gap-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90 px-8 py-4 rounded-2xl font-semibold text-lg transition">
+                        <i class="fa-solid fa-copy"></i> Get Script
+                    </a>
+                    <a href="#community" class="inline-flex items-center gap-3 glass px-8 py-4 rounded-2xl font-semibold text-lg hover:border-violet-400/50 transition">
+                        <i class="fa-brands fa-discord"></i> Join Discord
+                    </a>
+                </div>
+            </div>
+
+            <div class="glass rounded-3xl p-12 glow">
+                <div class="flex items-center gap-5 mb-10">
+                    <div class="w-20 h-20 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-3xl flex items-center justify-center text-3xl font-black shadow-2xl">AW</div>
+                    <div>
+                        <h2 class="text-4xl font-bold tracking-tight">AWHUB</h2>
+                        <p class="text-zinc-400 text-lg">v0.0.9 · Keyless</p>
+                    </div>
+                </div>
+                <p class="text-zinc-300 text-lg leading-relaxed mb-10">
+                    Underground auto farm • Bag full automation • Anti-fling • Auto rejoin
+                </p>
+                <a href="#script" class="block w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 font-semibold py-4 rounded-2xl text-center text-lg hover:scale-[1.02] transition">
+                    Copy Loadstring
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-24 bg-zinc-950">
+        <div class="max-w-6xl mx-auto px-6">
+            <h2 class="text-5xl font-bold text-center mb-16">Powerful Features</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass rounded-3xl p-10">
+                    <i class="fa-solid fa-layer-group text-6xl text-violet-400 mb-6"></i>
+                    <h3 class="text-3xl font-semibold mb-4">Underground Farm</h3>
+                    <p class="text-zinc-400">Completely hidden under the map with zero delay coin collection.</p>
+                </div>
+                <div class="glass rounded-3xl p-10">
+                    <i class="fa-solid fa-bolt text-6xl text-fuchsia-400 mb-6"></i>
+                    <h3 class="text-3xl font-semibold mb-4">Bag Full Automation</h3>
+                    <p class="text-zinc-400">Auto fling/kill/shoot when your bag reaches 40 coins.</p>
+                </div>
+                <div class="glass rounded-3xl p-10">
+                    <i class="fa-solid fa-shield-halved text-6xl text-emerald-400 mb-6"></i>
+                    <h3 class="text-3xl font-semibold mb-4">Anti-Detection Suite</h3>
+                    <p class="text-zinc-400">Anti-fling, anti-AFK, auto rejoin on kick.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Script -->
+    <section id="script" class="py-24 bg-zinc-900">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-4">Get the Script</h2>
+            <p class="text-zinc-400 text-center mb-12 text-lg">Keyless. Copy the loadstring and paste into your executor.</p>
+            
+            <div class="glass rounded-3xl overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <span class="font-mono text-sm text-zinc-400">LOADSTRING.LUA</span>
+                        <span class="px-2 py-0.5 text-xs font-semibold bg-emerald-500/20 text-emerald-400 rounded-full">KEYLESS</span>
+                    </div>
+                    <button id="copyBtn" onclick="copyScript()" class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 px-4 py-2 rounded-xl text-sm font-semibold transition">
+                        <i class="fa-regular fa-copy"></i> Copy Script
+                    </button>
+                </div>
+                <div class="p-6 code-box text-sm text-violet-200 overflow-x-auto">
+                    <code id="scriptCode">loadstring(game:HttpGet("https://applewareh.vercel.app/full.lua"))()</code>
+                </div>
+            </div>
+
+            <div class="mt-10 grid md:grid-cols-3 gap-6 text-center">
+                <div class="glass rounded-2xl p-6">
+                    <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-400 font-bold">1</div>
+                    <p class="text-zinc-300">Copy the script above</p>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                    <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-400 font-bold">2</div>
+                    <p class="text-zinc-300">Open your Roblox executor</p>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                    <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-400 font-bold">3</div>
+                    <p class="text-zinc-300">Paste &amp; execute in MM2</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Help / TOS -->
+    <section id="help" class="py-24 bg-zinc-950">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12">Help & TOS</h2>
+            <div class="glass rounded-3xl p-10 text-zinc-300 leading-relaxed">
+                <p class="mb-6"><strong>This script is provided for educational and entertainment purposes only.</strong></p>
+                <p class="mb-6">Use at your own risk. We are not responsible for any account bans or issues that may occur.</p>
+                <p class="mb-8">If you have any problems, bugs, or suggestions, please make a ticket in our Discord server.</p>
+                <a href="#community" class="inline-flex items-center gap-3 bg-violet-600 hover:bg-violet-700 px-8 py-4 rounded-2xl font-semibold">
+                    <i class="fa-brands fa-discord"></i> Open a Ticket in Discord
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community -->
+    <section id="community" class="py-24 bg-zinc-900">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-6">Join the Community</h2>
+            <p class="text-zinc-400 text-lg mb-10">Connect with other players, get support, and be first to hear about updates.</p>
+            <a href="https://discord.gg/" target="_blank" class="inline-flex items-center gap-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 px-10 py-4 rounded-2xl font-semibold text-lg hover:scale-[1.02] transition">
+                <i class="fa-brands fa-discord text-2xl"></i> Join Discord
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 text-center text-zinc-500 border-t border-white/10">
+        <p class="text-lg">applewareh.vercel.app · keyless</p>
+    </footer>
+
+    <!-- Welcome Popup -->
+    <div id="welcomePopup" class="fixed inset-0 hidden items-center justify-center bg-black/80 z-[100]">
+        <div class="glass rounded-3xl p-10 max-w-md text-center">
+            <h2 class="text-4xl font-bold mb-4">Welcome to AWHUB!</h2>
+            <p class="text-zinc-400 mb-8">Keyless MM2 auto farm. Copy the script and start farming.</p>
+            <button onclick="closeWelcome()" class="bg-violet-600 hover:bg-violet-700 px-10 py-3 rounded-2xl font-semibold">Get Started</button>
+        </div>
+    </div>
+
+    <script>
+        function showWelcome() {
+            document.getElementById('welcomePopup').classList.remove('hidden');
+            document.getElementById('welcomePopup').classList.add('flex');
+        }
+        function closeWelcome() {
+            document.getElementById('welcomePopup').classList.add('hidden');
+            document.getElementById('welcomePopup').classList.remove('flex');
+        }
+        function copyScript() {
+            const text = document.getElementById('scriptCode').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const b = document.getElementById('copyBtn');
+                const o = b.innerHTML;
+                b.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                setTimeout(() => b.innerHTML = o, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
