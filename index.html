@@ -62,7 +62,7 @@
   .btn:hover { transform: translateY(-2px); }
   .btn:active { transform: translateY(0); }
   .btn-p {
-    background: linear-gradient(135deg, #8b5cf6, #d946ef 55%, #f472b6);
+    background: linear-gradient(135deg, #8b5cf6, #d946ef  55%, #f472b6);
     box-shadow: 0 4px 22px rgba(139,92,246,.45), inset 0 1px 0 rgba(255,255,255,.25);
   }
   .btn-p:hover { box-shadow: 0 8px 30px rgba(139,92,246,.55), inset 0 1px 0 rgba(255,255,255,.3); }
@@ -226,7 +226,7 @@
         <span class="title-grad">Appleware</span>
       </h1>
       <p class="text-lg sm:text-xl text-zinc-400 leading-relaxed max-w-xl mx-auto mb-8">
-        The cleanest keyless MM2 auto farm. Underground coins, bag-full loops, anti-fling &amp; auto-rejoin.
+        The cleanest keyless MM2 auto farm. Underground coins, bag-full loops, anti-fling & auto-rejoin.
       </p>
       <div class="flex flex-wrap justify-center gap-2 mb-10">
         <span class="pill text-violet-200"><i class="fa-solid fa-key text-violet-400"></i> Keyless</span>
@@ -433,17 +433,6 @@ function saveReviews(list) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-function seedIfEmpty() {
-  const list = getReviews();
-  if (list.length) return;
-  const seeds = [
-    { name: 'ray', score: 10, text: 'keyless and actually works, bag fills nonstop', at: Date.now() - 86400000 * 3 },
-    { name: 'miko', score: 9, text: 'anti fling is solid, no more yeeting off the map', at: Date.now() - 86400000 * 2 },
-    { name: 'jax', score: 10, text: 'one line and im farming. clean af', at: Date.now() - 86400000 },
-  ];
-  saveReviews(seeds);
-}
-
 function renderScorePicker() {
   const el = document.getElementById('scorePicker');
   el.innerHTML = '';
@@ -479,8 +468,8 @@ function renderReviews() {
     return;
   }
   box.innerHTML = list.slice(0, 20).map(r => {
-    const name = (r.name || 'Anonymous').replace(/</g, '&lt;');
-    const text = (r.text || '').replace(/</g, '&lt;');
+    const name = (r.name || 'Anonymous').replace(/</g, '<');
+    const text = (r.text || '').replace(/</g, '<');
     return `<div class="glass card p-5">
       <div class="flex items-center justify-between gap-3 mb-2">
         <div class="font-semibold text-sm">${name}</div>
@@ -515,7 +504,6 @@ function submitReview() {
   m.classList.add('text-emerald-400');
 }
 
-seedIfEmpty();
 renderScorePicker();
 renderReviews();
 
