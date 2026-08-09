@@ -8,188 +8,178 @@
 <meta name="theme-color" content="#0a0a14"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
   * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
   html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    font-family: Inter, system-ui, sans-serif;
-    background: #0a0a14;
-    color: #fff;
-    overflow-x: hidden;
-  }
+  body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #080812; color: #fff; overflow-x: hidden; }
   ::selection { background: rgba(168,85,247,.4); color: #fff; }
-
   .bg-fx {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,.35), transparent 55%),
-      radial-gradient(ellipse 60% 40% at 90% 20%, rgba(219,39,119,.22), transparent 50%),
-      radial-gradient(ellipse 50% 40% at 50% 100%, rgba(99,102,241,.15), transparent 50%),
-      #0a0a14;
+      radial-gradient(ellipse 90% 55% at 15% -5%, rgba(124,58,237,.4), transparent 55%),
+      radial-gradient(ellipse 70% 45% at 95% 15%, rgba(219,39,119,.28), transparent 50%),
+      radial-gradient(ellipse 55% 45% at 50% 105%, rgba(99,102,241,.18), transparent 50%),
+      #080812;
   }
-
   .wrap { position: relative; z-index: 1; }
-
-  .card {
-    background: rgba(18, 18, 32, 0.92);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 1.25rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,.35);
-    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  .glass {
+    background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,0.12);
   }
+  .glass-strong {
+    background: linear-gradient(155deg, rgba(40,30,60,0.85), rgba(18,14,32,0.9));
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(167,139,250,0.22);
+    box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 50px rgba(139,92,246,.12), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .card { border-radius: 1.25rem; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
   .card:hover {
     transform: translateY(-4px);
-    border-color: rgba(167,139,250,0.35);
-    box-shadow: 0 16px 40px rgba(0,0,0,.45), 0 0 30px rgba(139,92,246,.12);
+    border-color: rgba(167,139,250,0.4);
+    box-shadow: 0 16px 40px rgba(0,0,0,.45), 0 0 30px rgba(139,92,246,.15), inset 0 1px 0 rgba(255,255,255,0.14);
   }
-
-  .card-hero {
-    background: linear-gradient(160deg, rgba(30,22,48,0.98), rgba(18,14,32,0.98));
-    border: 1px solid rgba(167,139,250,0.25);
-    border-radius: 1.5rem;
-    box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 60px rgba(139,92,246,.15);
-  }
-
   .nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 50;
-    background: rgba(10,10,20,0.9);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(8,8,18,0.75);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }
-
   .logo {
     background: linear-gradient(135deg, #8b5cf6, #d946ef);
-    box-shadow: 0 4px 16px rgba(139,92,246,.4);
+    box-shadow: 0 4px 16px rgba(139,92,246,.45), inset 0 1px 0 rgba(255,255,255,.3);
   }
-
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    border-radius: 0.875rem;
-    text-decoration: none;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    font-weight: 600; border-radius: 0.875rem; text-decoration: none; color: #fff;
+    border: none; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
   }
   .btn:hover { transform: translateY(-2px); }
   .btn:active { transform: translateY(0); }
   .btn-p {
-    background: linear-gradient(135deg, #8b5cf6, #d946ef);
-    box-shadow: 0 4px 20px rgba(139,92,246,.4);
+    background: linear-gradient(135deg, #8b5cf6, #d946ef 55%, #f472b6);
+    box-shadow: 0 4px 22px rgba(139,92,246,.45), inset 0 1px 0 rgba(255,255,255,.25);
   }
-  .btn-p:hover { box-shadow: 0 8px 28px rgba(139,92,246,.5); }
+  .btn-p:hover { box-shadow: 0 8px 30px rgba(139,92,246,.55), inset 0 1px 0 rgba(255,255,255,.3); }
   .btn-g {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.07);
     border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
-  .btn-g:hover { background: rgba(255,255,255,0.12); }
-
+  .btn-g:hover { background: rgba(255,255,255,0.11); border-color: rgba(167,139,250,0.35); }
   .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
   }
-
   .icon-box {
-    width: 48px; height: 48px;
-    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
     border-radius: 14px;
-    background: rgba(139,92,246,0.2);
-    border: 1px solid rgba(167,139,250,0.25);
-    color: #c4b5fd;
-    font-size: 1.1rem;
+    background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(217,70,239,0.12));
+    border: 1px solid rgba(167,139,250,0.28); color: #c4b5fd; font-size: 1.1rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
   }
-
   .step-num {
-    width: 44px; height: 44px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #8b5cf6, #d946ef);
-    font-weight: 800;
-    font-size: 1.1rem;
-    margin: 0 auto 1rem;
-    box-shadow: 0 4px 16px rgba(139,92,246,.4);
+    width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+    border-radius: 12px; background: linear-gradient(135deg, #8b5cf6, #d946ef);
+    font-weight: 800; font-size: 1.1rem; margin: 0 auto 1rem;
+    box-shadow: 0 4px 16px rgba(139,92,246,.4), inset 0 1px 0 rgba(255,255,255,.3);
   }
-
   .title-grad {
     background: linear-gradient(135deg, #e9d5ff, #f0abfc, #f9a8d4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-
-  .code {
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    background: #0d0d18;
-    color: #ddd6fe;
-  }
-
   .stat {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 0.75rem;
-    text-align: center;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 0.75rem; text-align: center; backdrop-filter: blur(8px);
   }
   .stat strong {
-    display: block;
-    font-size: 1.5rem;
-    font-weight: 800;
+    display: block; font-size: 1.5rem; font-weight: 800;
     background: linear-gradient(135deg, #c4b5fd, #f0abfc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .stat span {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #71717a;
-  }
-
+  .stat span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #71717a; }
   details summary { list-style: none; }
   details summary::-webkit-details-marker { display: none; }
   details[open] summary .chev { transform: rotate(180deg); }
   details summary .chev { transition: transform .2s; }
-
   .section-label {
-    color: #a78bfa;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
+    color: #a78bfa; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem;
   }
-
   .divider {
-    height: 1px;
-    max-width: 48rem;
-    margin: 0 auto;
-    background: linear-gradient(90deg, transparent, rgba(167,139,250,0.3), transparent);
+    height: 1px; max-width: 48rem; margin: 0 auto;
+    background: linear-gradient(90deg, transparent, rgba(167,139,250,0.35), transparent);
+  }
+  .script-shell {
+    position: relative; border-radius: 1.5rem; padding: 1px;
+    background: linear-gradient(135deg, rgba(167,139,250,0.7), rgba(236,72,153,0.5), rgba(139,92,246,0.4), rgba(167,139,250,0.7));
+    background-size: 300% 300%;
+    animation: borderFlow 6s ease infinite;
+    box-shadow: 0 0 40px rgba(139,92,246,.25), 0 20px 50px rgba(0,0,0,.45);
+  }
+  @keyframes borderFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .script-inner {
+    border-radius: calc(1.5rem - 1px);
+    background: linear-gradient(160deg, rgba(22,16,36,0.97), rgba(12,10,22,0.98));
+    overflow: hidden;
+  }
+  .script-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+  }
+  .script-dots { display: flex; gap: 6px; }
+  .script-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .script-dots span:nth-child(1) { background: #ff5f57; }
+  .script-dots span:nth-child(2) { background: #febc2e; }
+  .script-dots span:nth-child(3) { background: #28c840; }
+  .code-area {
+    position: relative;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    padding: 1.5rem 1.25rem 1.75rem;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,92,246,0.12), transparent 60%), #0c0a14;
+  }
+  .code-area::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+    background-size: 200% 100%;
+    animation: sheen 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes sheen {
+    0%, 100% { background-position: 200% 0; }
+    50% { background-position: -200% 0; }
+  }
+  .code-line { display: flex; gap: 1rem; align-items: flex-start; position: relative; z-index: 1; }
+  .line-num { color: #52525b; user-select: none; font-size: 0.85rem; line-height: 1.7; min-width: 1.25rem; text-align: right; }
+  .code-text { color: #ddd6fe; font-size: 0.9rem; line-height: 1.7; word-break: break-all; }
+  .code-text .fn { color: #c4b5fd; }
+  .code-text .str { color: #f0abfc; }
+  .code-text .punc { color: #a1a1aa; }
+  .copy-btn-lg.copied {
+    background: linear-gradient(135deg, #10b981, #34d399) !important;
+    box-shadow: 0 4px 22px rgba(16,185,129,.45) !important;
+  }
+  .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(139,92,246,.2), 0 20px 50px rgba(0,0,0,.45); }
+    50% { box-shadow: 0 0 50px rgba(139,92,246,.35), 0 20px 50px rgba(0,0,0,.45); }
   }
 </style>
 </head>
 <body>
 <div class="bg-fx" aria-hidden="true"></div>
-
 <div class="wrap">
   <nav class="nav">
     <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
@@ -202,13 +192,9 @@
         <a href="#how" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition">How</a>
         <a href="#script" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition">Script</a>
         <a href="#faq" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition">FAQ</a>
-        <a href="https://discord.gg/B3FmVJrMX7" target="_blank" rel="noreferrer" class="btn btn-p ml-2 px-4 py-2 text-sm">
-          <i class="fa-brands fa-discord"></i> Discord
-        </a>
+        <a href="https://discord.gg/B3FmVJrMX7" target="_blank" rel="noreferrer" class="btn btn-p ml-2 px-4 py-2 text-sm"><i class="fa-brands fa-discord"></i> Discord</a>
       </div>
-      <a href="https://discord.gg/B3FmVJrMX7" target="_blank" rel="noreferrer" class="md:hidden btn btn-p w-10 h-10">
-        <i class="fa-brands fa-discord"></i>
-      </a>
+      <a href="https://discord.gg/B3FmVJrMX7" target="_blank" rel="noreferrer" class="md:hidden btn btn-p w-10 h-10"><i class="fa-brands fa-discord"></i></a>
     </div>
   </nav>
 
@@ -216,15 +202,10 @@
     <div class="max-w-6xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center">
       <div>
         <div class="inline-flex items-center gap-2 pill mb-6 text-zinc-300">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          Live · Keyless · v1
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live · Keyless · v1
         </div>
-        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-none mb-5">
-          <span class="title-grad">AWHUB</span>
-        </h1>
-        <p class="text-lg text-zinc-400 leading-relaxed max-w-md mb-6">
-          The cleanest keyless MM2 auto farm. Underground coins, bag-full loops, anti-fling &amp; auto-rejoin.
-        </p>
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-none mb-5"><span class="title-grad">AWHUB</span></h1>
+        <p class="text-lg text-zinc-400 leading-relaxed max-w-md mb-6">The cleanest keyless MM2 auto farm. Underground coins, bag-full loops, anti-fling &amp; auto-rejoin.</p>
         <div class="flex flex-wrap gap-2 mb-8">
           <span class="pill text-violet-200"><i class="fa-solid fa-key text-violet-400"></i> Keyless</span>
           <span class="pill text-fuchsia-200"><i class="fa-solid fa-bolt text-fuchsia-400"></i> 0 delay</span>
@@ -236,18 +217,12 @@
           <a href="https://discord.gg/B3FmVJrMX7" target="_blank" rel="noreferrer" class="btn btn-g px-7 py-3.5 text-base"><i class="fa-brands fa-discord"></i> Discord</a>
         </div>
       </div>
-
-      <div class="card-hero p-8">
+      <div class="glass-strong card p-8">
         <div class="flex items-center gap-4 mb-6">
           <div class="logo w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black">AW</div>
-          <div>
-            <div class="text-2xl font-black">AWHUB</div>
-            <div class="text-zinc-400 text-sm">Murder Mystery 2 · Keyless</div>
-          </div>
+          <div><div class="text-2xl font-black">AWHUB</div><div class="text-zinc-400 text-sm">Murder Mystery 2 · Keyless</div></div>
         </div>
-        <p class="text-zinc-300 text-sm leading-relaxed mb-6">
-          Hidden underground auto farm with bag-full automation, anti-fling, and auto-rejoin on kick.
-        </p>
+        <p class="text-zinc-300 text-sm leading-relaxed mb-6">Hidden underground auto farm with bag-full automation, anti-fling, and auto-rejoin on kick.</p>
         <div class="grid grid-cols-2 gap-3 mb-6">
           <div class="stat"><strong>0</strong><span>Keys needed</span></div>
           <div class="stat"><strong>1</strong><span>Line to run</span></div>
@@ -269,51 +244,15 @@
         <p class="text-zinc-500 max-w-lg mx-auto">Everything you need for clean MM2 coin runs — no keys, no friction.</p>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-layer-group"></i></div>
-          <h3 class="text-lg font-bold mb-2">Underground Farm</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">Stay hidden under the map while collecting coins with near-zero delay.</p>
-        </div>
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-bolt"></i></div>
-          <h3 class="text-lg font-bold mb-2">Bag Full Loop</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">When your bag hits capacity, the script keeps the farm loop running.</p>
-        </div>
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-shield-halved"></i></div>
-          <h3 class="text-lg font-bold mb-2">Anti-Fling</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">Velocity resets keep you from getting flung off the map mid-farm.</p>
-        </div>
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-rotate"></i></div>
-          <h3 class="text-lg font-bold mb-2">Auto Rejoin</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">Kicked or errored out? Teleports you back so farming continues.</p>
-        </div>
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-key"></i></div>
-          <h3 class="text-lg font-bold mb-2">100% Keyless</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">No key systems, no linkvertise, no waiting. Paste and go.</p>
-        </div>
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-gauge-high"></i></div>
-          <h3 class="text-lg font-bold mb-2">Low Overhead</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">Runs smooth on Delta, Wave, Solara, Codex, and most executors.</p>
-        </div>
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-user-slash"></i></div>
-          <h3 class="text-lg font-bold mb-2">Anti-AFK</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">Keeps you active so Roblox does not idle-kick long sessions.</p>
-        </div>
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-map"></i></div>
-          <h3 class="text-lg font-bold mb-2">Map Agnostic</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">Works across MM2 maps with reliable under-map pathing.</p>
-        </div>
-        <div class="card p-6">
-          <div class="icon-box mb-4"><i class="fa-solid fa-code"></i></div>
-          <h3 class="text-lg font-bold mb-2">One-Line Setup</h3>
-          <p class="text-zinc-500 text-sm leading-relaxed">Single loadstring. No configs, no folders. Copy and execute.</p>
-        </div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-layer-group"></i></div><h3 class="text-lg font-bold mb-2">Underground Farm</h3><p class="text-zinc-500 text-sm leading-relaxed">Stay hidden under the map while collecting coins with near-zero delay.</p></div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-bolt"></i></div><h3 class="text-lg font-bold mb-2">Bag Full Loop</h3><p class="text-zinc-500 text-sm leading-relaxed">When your bag hits capacity, the script keeps the farm loop running.</p></div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-shield-halved"></i></div><h3 class="text-lg font-bold mb-2">Anti-Fling</h3><p class="text-zinc-500 text-sm leading-relaxed">Velocity resets keep you from getting flung off the map mid-farm.</p></div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-rotate"></i></div><h3 class="text-lg font-bold mb-2">Auto Rejoin</h3><p class="text-zinc-500 text-sm leading-relaxed">Kicked or errored out? Teleports you back so farming continues.</p></div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-key"></i></div><h3 class="text-lg font-bold mb-2">100% Keyless</h3><p class="text-zinc-500 text-sm leading-relaxed">No key systems, no linkvertise, no waiting. Paste and go.</p></div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-gauge-high"></i></div><h3 class="text-lg font-bold mb-2">Low Overhead</h3><p class="text-zinc-500 text-sm leading-relaxed">Runs smooth on Delta, Wave, Solara, Codex, and most executors.</p></div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-user-slash"></i></div><h3 class="text-lg font-bold mb-2">Anti-AFK</h3><p class="text-zinc-500 text-sm leading-relaxed">Keeps you active so Roblox does not idle-kick long sessions.</p></div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-map"></i></div><h3 class="text-lg font-bold mb-2">Map Agnostic</h3><p class="text-zinc-500 text-sm leading-relaxed">Works across MM2 maps with reliable under-map pathing.</p></div>
+        <div class="glass card p-6"><div class="icon-box mb-4"><i class="fa-solid fa-code"></i></div><h3 class="text-lg font-bold mb-2">One-Line Setup</h3><p class="text-zinc-500 text-sm leading-relaxed">Single loadstring. No configs, no folders. Copy and execute.</p></div>
       </div>
     </div>
   </section>
@@ -328,54 +267,46 @@
         <p class="text-zinc-500">Open executor. Paste. Farm.</p>
       </div>
       <div class="grid md:grid-cols-3 gap-4">
-        <div class="card p-8 text-center">
-          <div class="step-num">1</div>
-          <h3 class="text-lg font-bold mb-2">Open your executor</h3>
-          <p class="text-zinc-500 text-sm">Delta, Wave, Solara, Codex — anything with loadstring + HttpGet.</p>
-        </div>
-        <div class="card p-8 text-center">
-          <div class="step-num">2</div>
-          <h3 class="text-lg font-bold mb-2">Copy the loadstring</h3>
-          <p class="text-zinc-500 text-sm">One line below. Keyless. No verification. No extra steps.</p>
-        </div>
-        <div class="card p-8 text-center">
-          <div class="step-num">3</div>
-          <h3 class="text-lg font-bold mb-2">Execute in MM2</h3>
-          <p class="text-zinc-500 text-sm">Join Murder Mystery 2, paste, execute. Farm starts underground.</p>
-        </div>
+        <div class="glass card p-8 text-center"><div class="step-num">1</div><h3 class="text-lg font-bold mb-2">Open your executor</h3><p class="text-zinc-500 text-sm">Delta, Wave, Solara, Codex — anything with loadstring + HttpGet.</p></div>
+        <div class="glass card p-8 text-center"><div class="step-num">2</div><h3 class="text-lg font-bold mb-2">Copy the loadstring</h3><p class="text-zinc-500 text-sm">One line below. Keyless. No verification. No extra steps.</p></div>
+        <div class="glass card p-8 text-center"><div class="step-num">3</div><h3 class="text-lg font-bold mb-2">Execute in MM2</h3><p class="text-zinc-500 text-sm">Join Murder Mystery 2, paste, execute. Farm starts underground.</p></div>
       </div>
     </div>
   </section>
 
   <div class="divider"></div>
 
-  <section id="script" class="py-20 px-5">
+  <section id="script" class="py-24 px-5">
     <div class="max-w-3xl mx-auto">
       <div class="text-center mb-10">
         <p class="section-label">Install</p>
-        <h2 class="text-4xl sm:text-5xl font-black tracking-tight mb-3">The only line you need</h2>
-        <p class="text-zinc-500">Copy → paste into executor → execute in MM2</p>
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight mb-3">Get the script</h2>
+        <p class="text-zinc-500">One line. Keyless. Copy and run.</p>
       </div>
-      <div class="card overflow-hidden">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-white/10">
-          <div class="flex items-center gap-2">
-            <span class="font-mono text-xs text-zinc-500">LOADSTRING.LUA</span>
-            <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/15 text-emerald-400 rounded-full border border-emerald-500/25">KEYLESS</span>
+      <div class="script-shell glow-pulse">
+        <div class="script-inner">
+          <div class="script-header">
+            <div class="flex items-center gap-3">
+              <div class="script-dots"><span></span><span></span><span></span></div>
+              <span class="font-mono text-xs text-zinc-500 ml-1">loadstring.lua</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/15 text-emerald-400 rounded-full border border-emerald-500/25">KEYLESS</span>
+            </div>
+            <button id="copyBtn" onclick="copyScript()" class="btn btn-p copy-btn-lg px-4 py-2 text-sm"><i class="fa-regular fa-copy"></i> <span id="copyLabel">Copy</span></button>
           </div>
-          <button id="copyBtn" onclick="copyScript()" class="btn btn-p px-4 py-2 text-sm">
-            <i class="fa-regular fa-copy"></i> Copy
-          </button>
-        </div>
-        <div class="code p-5 text-sm sm:text-base overflow-x-auto">
-          <code id="scriptCode">loadstring(game:HttpGet("https://applewareh.vercel.app/full.lua"))()</code>
+          <div class="code-area">
+            <div class="code-line">
+              <span class="line-num">1</span>
+              <code class="code-text" id="scriptCode"><span class="fn">loadstring</span><span class="punc">(</span><span class="fn">game</span><span class="punc">:</span><span class="fn">HttpGet</span><span class="punc">(</span><span class="str">"https://applewareh.vercel.app/full.lua"</span><span class="punc">))()</span></code>
+            </div>
+          </div>
+          <div class="px-5 py-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-black/20">
+            <p class="text-xs text-zinc-500 text-center sm:text-left">Paste into your executor while in Murder Mystery 2</p>
+            <button onclick="copyScript()" class="btn btn-p copy-btn-lg px-6 py-2.5 text-sm w-full sm:w-auto"><i class="fa-solid fa-terminal"></i> <span class="copyLabel2">Copy loadstring</span></button>
+          </div>
         </div>
       </div>
-      <div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-zinc-500">
-        <span class="pill">Delta</span>
-        <span class="pill">Wave</span>
-        <span class="pill">Solara</span>
-        <span class="pill">Codex</span>
-        <span class="pill">Most executors</span>
+      <div class="mt-8 flex flex-wrap justify-center gap-2 text-xs text-zinc-500">
+        <span class="pill">Delta</span><span class="pill">Wave</span><span class="pill">Solara</span><span class="pill">Codex</span><span class="pill">Most executors</span>
       </div>
     </div>
   </section>
@@ -384,53 +315,20 @@
 
   <section id="faq" class="py-20 px-5">
     <div class="max-w-2xl mx-auto">
-      <div class="text-center mb-10">
-        <p class="section-label">FAQ</p>
-        <h2 class="text-4xl sm:text-5xl font-black tracking-tight">Questions</h2>
-      </div>
+      <div class="text-center mb-10"><p class="section-label">FAQ</p><h2 class="text-4xl sm:text-5xl font-black tracking-tight">Questions</h2></div>
       <div class="space-y-3" id="faqList">
-        <details class="card group" open>
-          <summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">
-            Is it really keyless?
-            <i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i>
-          </summary>
-          <div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">Yes. No keys, no captchas, no forced links. Loadstring and go.</div>
-        </details>
-        <details class="card group">
-          <summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">
-            Is this a stealer?
-            <i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i>
-          </summary>
-          <div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">No. AWHUB only farms MM2 coins underground with bag automation. It does not touch inventory, weapons, or accounts.</div>
-        </details>
-        <details class="card group">
-          <summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">
-            Can I get banned?
-            <i class="fa-solid fa-chevron-down chev text-zinc-600 text-xs"></i>
-          </summary>
-          <div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">Any exploit has risk. Use at your own risk — we are not responsible for account actions.</div>
-        </details>
-        <details class="card group">
-          <summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">
-            Which executors work?
-            <i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i>
-          </summary>
-          <div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">Anything supporting loadstring + game:HttpGet — Delta, Wave, Solara, Codex, and most modern options.</div>
-        </details>
-        <details class="card group">
-          <summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">
-            Script will not load?
-            <i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i>
-          </summary>
-          <div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">Be in MM2, enable HTTP in your executor, re-copy the loadstring. Still stuck? Ask in Discord.</div>
-        </details>
+        <details class="glass card group" open><summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">Is it really keyless?<i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i></summary><div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">Yes. No keys, no captchas, no forced links. Loadstring and go.</div></details>
+        <details class="glass card group"><summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">Is this a stealer?<i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i></summary><div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">No. AWHUB only farms MM2 coins underground with bag automation. It does not touch inventory, weapons, or accounts.</div></details>
+        <details class="glass card group"><summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">Can I get banned?<i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i></summary><div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">Any exploit has risk. Use at your own risk — we are not responsible for account actions.</div></details>
+        <details class="glass card group"><summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">Which executors work?<i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i></summary><div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">Anything supporting loadstring + game:HttpGet — Delta, Wave, Solara, Codex, and most modern options.</div></details>
+        <details class="glass card group"><summary class="flex items-center justify-between cursor-pointer px-5 py-4 font-semibold text-[15px]">Script will not load?<i class="fa-solid fa-chevron-down chev text-zinc-500 text-xs"></i></summary><div class="px-5 pb-4 text-zinc-500 text-sm leading-relaxed">Be in MM2, enable HTTP in your executor, re-copy the loadstring. Still stuck? Ask in Discord.</div></details>
       </div>
     </div>
   </section>
 
   <section class="py-16 px-5">
     <div class="max-w-3xl mx-auto">
-      <div class="card-hero p-10 sm:p-12 text-center">
+      <div class="glass-strong card p-10 sm:p-12 text-center">
         <h2 class="text-3xl sm:text-4xl font-black tracking-tight mb-3">Start farming</h2>
         <p class="text-zinc-400 mb-8">One paste. Zero keys. Full bags.</p>
         <div class="flex flex-wrap justify-center gap-3">
@@ -443,36 +341,36 @@
 
   <footer class="py-10 px-5 border-t border-white/5">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-600">
-      <div class="flex items-center gap-2">
-        <div class="logo w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-black">AW</div>
-        <span>applewareh.vercel.app · keyless</span>
-      </div>
-      <div class="flex gap-5">
-        <a href="#features" class="hover:text-zinc-400 transition">Features</a>
-        <a href="#script" class="hover:text-zinc-400 transition">Script</a>
-        <a href="https://discord.gg/B3FmVJrMX7" target="_blank" rel="noreferrer" class="hover:text-zinc-400 transition">Discord</a>
-      </div>
+      <div class="flex items-center gap-2"><div class="logo w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-black">AW</div><span>applewareh.vercel.app · keyless</span></div>
+      <div class="flex gap-5"><a href="#features" class="hover:text-zinc-400 transition">Features</a><a href="#script" class="hover:text-zinc-400 transition">Script</a><a href="https://discord.gg/B3FmVJrMX7" target="_blank" rel="noreferrer" class="hover:text-zinc-400 transition">Discord</a></div>
     </div>
   </footer>
 </div>
-
 <script>
 function copyScript() {
-  const t = document.getElementById('scriptCode').innerText;
-  navigator.clipboard.writeText(t).then(() => {
-    const b = document.getElementById('copyBtn');
-    const o = b.innerHTML;
-    b.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
-    setTimeout(() => { b.innerHTML = o; }, 2000);
+  const plain = 'loadstring(game:HttpGet("https://applewareh.vercel.app/full.lua"))()';
+  navigator.clipboard.writeText(plain).then(() => {
+    document.querySelectorAll('.copy-btn-lg').forEach((b) => {
+      b.classList.add('copied');
+      const icon = b.querySelector('i');
+      const label = b.querySelector('#copyLabel, .copyLabel2, span:last-child');
+      if (icon) icon.className = 'fa-solid fa-check';
+      if (label) label.textContent = 'Copied!';
+    });
+    setTimeout(() => {
+      document.querySelectorAll('.copy-btn-lg').forEach((b) => {
+        b.classList.remove('copied');
+        const icon = b.querySelector('i');
+        const label = b.querySelector('#copyLabel, .copyLabel2, span:last-child');
+        if (icon) icon.className = b.id === 'copyBtn' ? 'fa-regular fa-copy' : 'fa-solid fa-terminal';
+        if (label) label.textContent = b.id === 'copyBtn' ? 'Copy' : 'Copy loadstring';
+      });
+    }, 2000);
   });
 }
 document.querySelectorAll('#faqList details').forEach((d) => {
   d.addEventListener('toggle', () => {
-    if (d.open) {
-      document.querySelectorAll('#faqList details').forEach((o) => {
-        if (o !== d) o.open = false;
-      });
-    }
+    if (d.open) document.querySelectorAll('#faqList details').forEach((o) => { if (o !== d) o.open = false; });
   });
 });
 </script>
