@@ -153,7 +153,7 @@ local settingsConfig = {
     discordUserId = ""
 }
 
-local CONFIG_FILE = "AWhub_Settings_V17.json"
+local CONFIG_FILE = "AppleWare_settings.json"
 
 local function saveSettings()
     pcall(function()
@@ -186,7 +186,7 @@ end
 loadSettings()
 
 local TWEEN_SPEED = 25
-local UNDER = 2.9
+local UNDER = 3.4
 local HIDE_POS = CFrame.new(0, 300, 0)
 local MIN_BAG_FULL = 40
 
