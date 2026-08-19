@@ -1,6 +1,5 @@
 -- ====================================================================
--- AWhub - ok (Fixed Webhook Avatar URL)
--- ====================================================================
+-- AWhub - ok ====================================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -1257,4 +1256,4 @@ task.spawn(function()
     end)
 end)
 
-print("AWhub loaded - enjoy my script (made by word) and also fuck you but enjoy your day")
+print("AppleWare loaded - enjoy my script (made by word) and also fuck you but enjoy your day")
