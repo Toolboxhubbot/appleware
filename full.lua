@@ -1,5 +1,6 @@
 -- ====================================================================
--- AWhub - ok ====================================================================
+-- AWhub - ok
+-- ====================================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -153,7 +154,7 @@ local settingsConfig = {
     discordUserId = ""
 }
 
-local CONFIG_FILE = "AppleWare_settings.json"
+local CONFIG_FILE = "Appleware-settings.json"
 
 local function saveSettings()
     pcall(function()
@@ -320,7 +321,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
         fields = fields or {},
         author = {
             name = "AWhub Automation Suite",
-            icon_url = "https://i.imgur.com/5J3C999.png"
+            icon_url = "https://i.imgur.com/83pZ7wA.png"
         },
         footer = {
             text = "https://applewareh.vercel.app • " .. os.date("%H:%M:%S")
@@ -331,7 +332,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
     local data = {
         content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
         username = "AWhub Bot",
-        avatar_url = "https://i.imgur.com/5J3C999.png",
+        avatar_url = "https://i.imgur.com/83pZ7wA.png",
         embeds = {embed}
     }
 
@@ -1256,4 +1257,4 @@ task.spawn(function()
     end)
 end)
 
-print("AppleWare loaded - enjoy my script (made by word) and also fuck you but enjoy your day")
+print("AWhub loaded - enjoy my script (made by word) and also fuck you but enjoy your day :)")
