@@ -1,5 +1,5 @@
 -- ====================================================================
--- AWhub - ok pls no steal
+-- AWhub - ok pls no steal i try
 -- ====================================================================
 
 local Players = game:GetService("Players")
@@ -232,7 +232,7 @@ promptDeviceSelection()
 repeat task.wait() until promptLoaded
 
 local state = {
-    farm = true,
+    farm = false,
     xpFarm = false,
     noclip = false,
     gun = false,
@@ -470,7 +470,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
     }
 
     local data = {
-        content = ping ~= "" and (ping .. " 🖕 Status update report:") or nil,
+        content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
         username = "AWhub Bot",
         embeds = {embed},
         allowed_mentions = {
@@ -629,7 +629,7 @@ local function VoidReset(TargetPlayer)
         restoreSelf(Character, {cframe = savedCF}, originalDestroyHeight)
         state.farm, state.xpFarm = oldFarm, oldXpFarm
         isExecutingAction = false
-        if st then st.Text = " [AWhub] Murderer flung!" end
+        if st then st.Text = " [AWhub] Murderer fling attempt ended." end
     end
 
     resetObj.conn = RunService.Heartbeat:Connect(function()
@@ -654,31 +654,56 @@ local function VoidReset(TargetPlayer)
     end)
 end
 
+-- ==================== RELIABLE FLING WITH RETRIES ====================
+local function reliableFling(TargetPlayer)
+    if not TargetPlayer or TargetPlayer == LP then return end
+    task.spawn(function()
+        local maxAttempts = 4
+        for attempt = 1, maxAttempts do
+            if not TargetPlayer or not TargetPlayer.Parent then break end
+            
+            -- Check if target is already dead
+            local tChar = TargetPlayer.Character
+            local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
+            if not tHum or tHum.Health <= 0 then break end
+
+            VoidReset(TargetPlayer)
+
+            -- Wait until this specific attempt finishes
+            while activeResets[TargetPlayer.UserId] do
+                task.wait(0.1)
+            end
+
+            task.wait(0.4)
+
+            -- Check if target died
+            tChar = TargetPlayer.Character
+            tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
+            if not tHum or tHum.Health <= 0 then
+                if st then st.Text = " [AWhub] Murderer successfully eliminated!" end
+                break
+            else
+                if attempt < maxAttempts then
+                    if st then st.Text = " [AWhub] Fling failed, retrying (" .. (attempt + 1) .. "/" .. maxAttempts .. ")..." end
+                    task.wait(0.6)
+                else
+                    if st then st.Text = " [AWhub] Max fling attempts reached." end
+                end
+            end
+        end
+    end)
+end
+
 local function flingMurdererNow()
     task.spawn(function()
         local mur = getMurd()
         if mur and mur.Character then
-            VoidReset(mur)
+            reliableFling(mur)
         else
             if st then st.Text = " [AWhub] Murderer not found!" end
         end
     end)
 end
-
-task.spawn(function()
-    while true do
-        task.wait(1.2)
-        if state.autoFlingMur and not isExecutingAction and roundFullyStarted then
-            if hasCollectedThisRound and (bagFull or currentCoinCount >= MIN_BAG_FULL) then
-                local mur = getMurd()
-                if mur and mur.Character then
-                    VoidReset(mur)
-                    task.wait(4)
-                end
-            end
-        end
-    end
-end)
 
 local function serverHop()
     pcall(function()
@@ -729,6 +754,10 @@ local function equipTool(name)
 end
 
 local function getRole()
+    local roleData = getCachedRoleData()
+    if roleData and roleData[LP.Name] and roleData[LP.Name].Role then
+        return roleData[LP.Name].Role
+    end
     if findTool("Knife") then return "Murderer" end
     if findTool("Gun") then return "Sheriff" end
     return "Innocent"
@@ -1125,21 +1154,20 @@ end
 -- ==================== AUTOMATION TRIGGER (AT 40 COINS) ====================
 local function runBagFullAction()
     if busy or not hasCollectedThisRound then return end
-    if not bagFull and currentCoinCount < MIN_BAG_FULL then return end
+    if currentCoinCount < MIN_BAG_FULL then return end
+
+    busy = true
+    isExecutingAction = true
+    bagFull = true
+    cancelFarmTween()
+
+    totalCoinsEarned = totalCoinsEarned + currentCoinCount
 
     local role = getRole()
-    
-    -- ONLY trigger the action/hiding loop if you are actually the Murderer and have Auto Kill All enabled
-    if role == "Murderer" then
-        busy = true
-        isExecutingAction = true
-        cancelFarmTween()
-        bagFull = true
-        standUp()
 
-        totalCoinsEarned = totalCoinsEarned + currentCoinCount
-
-        pcall(function()
+    pcall(function()
+        if role == "Murderer" then
+            standUp()
             if state.autoKillAll then
                 if st then st.Text = " [AWhub] Executing Auto Kill All..." end
                 autoKillAllPlayers()
@@ -1149,17 +1177,33 @@ local function runBagFullAction()
                 triggerMenuReset()
                 task.wait(1.5)
             end
-        end)
+        else
+            -- Innocent or Sheriff logic
+            if state.autoFlingMur then
+                local mur = getMurd()
+                if mur and mur.Character then
+                    if st then st.Text = " [AWhub] Flinging Murderer..." end
+                    busy = false
+                    isExecutingAction = false
+                    reliableFling(mur)
+                    busy = true
+                    isExecutingAction = true
+                end
+            end
 
-        hideSky()
-        busy = false
-        isExecutingAction = false
-        bagFull = false
-    else
-        -- If you are Sheriff or Innocent, just reset or ignore the bag full trigger so it doesn't loop
-        bagFull = false
-        currentCoinCount = 0
-    end
+            if role == "Innocent" and state.autoResetInnocent then
+                triggerMenuReset()
+                task.wait(1.5)
+            elseif role == "Sheriff" and state.autoResetSheriff then
+                triggerMenuReset()
+                task.wait(1.5)
+            end
+        end
+    end)
+
+    hideSky()
+    busy = false
+    isExecutingAction = false
 end
 
 -- Coin remote
@@ -1418,4 +1462,4 @@ task.spawn(function()
     end)
 end)
 
-print("Appleware loaded - enjoy my script also fuck you but have a good day (made hy word)")
+print("Appleware loaded - enjoy my script also fuck you but have a good day (made by word)")
