@@ -1,5 +1,5 @@
 -- ====================================================================
--- AWhub - ok pls no steal i try
+-- AWhub - ok pls no steal
 -- ====================================================================
 
 local Players = game:GetService("Players")
@@ -232,7 +232,7 @@ promptDeviceSelection()
 repeat task.wait() until promptLoaded
 
 local state = {
-    farm = false,
+    farm = true,
     xpFarm = false,
     noclip = false,
     gun = false,
@@ -662,21 +662,18 @@ local function reliableFling(TargetPlayer)
         for attempt = 1, maxAttempts do
             if not TargetPlayer or not TargetPlayer.Parent then break end
             
-            -- Check if target is already dead
             local tChar = TargetPlayer.Character
             local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
             if not tHum or tHum.Health <= 0 then break end
 
             VoidReset(TargetPlayer)
 
-            -- Wait until this specific attempt finishes
             while activeResets[TargetPlayer.UserId] do
                 task.wait(0.1)
             end
 
             task.wait(0.4)
 
-            -- Check if target died
             tChar = TargetPlayer.Character
             tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
             if not tHum or tHum.Health <= 0 then
@@ -1178,7 +1175,6 @@ local function runBagFullAction()
                 task.wait(1.5)
             end
         else
-            -- Innocent or Sheriff logic
             if state.autoFlingMur then
                 local mur = getMurd()
                 if mur and mur.Character then
@@ -1270,7 +1266,7 @@ task.spawn(function()
     while true do
         task.wait(0.04)
 
-        if not alive() or not state.farm then
+        if not alive() then
             cancelFarmTween()
             continue
         end
@@ -1279,16 +1275,23 @@ task.spawn(function()
         local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
         if not root or not humanoid then continue end
 
-        if (state.xpFarm and not isExecutingAction) or isLobby() then
+        -- FIX: XP Farm now correctly locks position without getting interrupted by round states
+        if state.xpFarm then
             cancelFarmTween()
             humanoid.PlatformStand = true
             root.Anchored = true
             root.CFrame = HIDE_POS
             root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
             continue
         end
 
-        if bagFull or isExecutingAction then
+        if not state.farm then
+            cancelFarmTween()
+            continue
+        end
+
+        if isLobby() or bagFull or isExecutingAction then
             cancelFarmTween()
             humanoid.PlatformStand = true
             root.Anchored = true
