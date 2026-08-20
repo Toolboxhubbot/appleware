@@ -1,5 +1,5 @@
 -- ====================================================================
--- AWhub - ok
+-- AWhub - ok, please dont steal this
 -- ====================================================================
 
 local Players = game:GetService("Players")
@@ -155,7 +155,7 @@ local settingsConfig = {
     discordUserId = ""
 }
 
-local CONFIG_FILE = "Appleware.json"
+local CONFIG_FILE = "Applware.json"
 
 local function saveSettings()
     pcall(function()
@@ -188,7 +188,7 @@ end
 loadSettings()
 
 local TWEEN_SPEED = 25
-local UNDER = 3.4
+local UNDER = 3.4 -- Updated height to 3.4
 local HIDE_POS = CFrame.new(0, 300, 0)
 local MIN_BAG_FULL = 40
 
@@ -308,14 +308,9 @@ end
 local function applyLowDeviceOptimizations(enabled)
     pcall(function()
         if enabled then
-            -- 1. Disable 3D Rendering to completely lift GPU load
             RunService:Set3dRenderingEnabled(false)
             if blackScreen then blackScreen.Visible = true end
-
-            -- 2. Lower Roblox internal graphics quality to minimum
             UserGameSettings.SavedQualityLevel = Enum.SavedQualityLevel.Level0
-
-            -- 3. Strip heavy Lighting effects & Shadows
             Lighting.GlobalShadows = false
             Lighting.FogEnd = 9e9
             for _, v in ipairs(Lighting:GetChildren()) do
@@ -323,8 +318,6 @@ local function applyLowDeviceOptimizations(enabled)
                     v.Enabled = false
                 end
             end
-
-            -- 4. Disable heavy Workspace particle assets (Particles, Beams, Trails, Fire)
             task.spawn(function()
                 for _, v in ipairs(Workspace:GetDescendants()) do
                     if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") then
@@ -332,11 +325,8 @@ local function applyLowDeviceOptimizations(enabled)
                     end
                 end
             end)
-
-            -- 5. Force garbage collection to clean up memory leaks and reduce RAM usage
             collectgarbage("collect")
         else
-            -- Restore default rendering & lighting behavior when toggled off
             RunService:Set3dRenderingEnabled(true)
             if blackScreen then blackScreen.Visible = false end
             UserGameSettings.SavedQualityLevel = Enum.SavedQualityLevel.Level10
@@ -1109,7 +1099,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== SMOOTH CONTINUOUS FARM ====================
+-- ==================== SMOOTH CONSTANT TWEEN FARM ====================
 task.spawn(function()
     while true do
         task.wait(0.04)
@@ -1162,11 +1152,9 @@ task.spawn(function()
 
         local dist = (root.Position - closestCoin.Position).Magnitude
 
+        -- Updated proximity check to aura size of 7
         if dist <= 7 then
             collectCoin(root, closestCoin)
-            local safePos = closestCoin.Position + Vector3.new(0, -UNDER, 0)
-            root.CFrame = CFrame.new(safePos) * CFrame.Angles(math.rad(90), 0, math.rad(180))
-            continue
         end
 
         if currentFarmTween and currentFarmTween.PlaybackState == Enum.PlaybackState.Playing then
@@ -1178,11 +1166,11 @@ task.spawn(function()
 
         local targetPos = closestCoin.Position + Vector3.new(0, -UNDER, 0)
         local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(90), 0, math.rad(180))
-        local duration = math.clamp(dist / TWEEN_SPEED, 0.07, 3.3)
+        local duration = math.clamp(dist / TWEEN_SPEED, 0.05, 3.3)
 
         currentFarmTween = TweenService:Create(
             root,
-            TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+            TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), -- Constant linear tweening
             {CFrame = targetCFrame}
         )
         currentFarmTween:Play()
