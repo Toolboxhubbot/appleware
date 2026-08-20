@@ -11,7 +11,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 local TeleportService = game:GetService("TeleportService")
-local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local UserGameSettings = UserSettings():GetService("UserGameSettings")
 
 local LP = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
@@ -154,7 +155,7 @@ local settingsConfig = {
     discordUserId = ""
 }
 
-local CONFIG_FILE = "Appleware-settings.json"
+local CONFIG_FILE = "Appleware.json"
 
 local function saveSettings()
     pcall(function()
@@ -303,6 +304,52 @@ local function cancelFarmTween()
     end
 end
 
+-- ==================== ADVANCED LOW-DEVICE OPTIMIZER ====================
+local function applyLowDeviceOptimizations(enabled)
+    pcall(function()
+        if enabled then
+            -- 1. Disable 3D Rendering to completely lift GPU load
+            RunService:Set3dRenderingEnabled(false)
+            if blackScreen then blackScreen.Visible = true end
+
+            -- 2. Lower Roblox internal graphics quality to minimum
+            UserGameSettings.SavedQualityLevel = Enum.SavedQualityLevel.Level0
+
+            -- 3. Strip heavy Lighting effects & Shadows
+            Lighting.GlobalShadows = false
+            Lighting.FogEnd = 9e9
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") then
+                    v.Enabled = false
+                end
+            end
+
+            -- 4. Disable heavy Workspace particle assets (Particles, Beams, Trails, Fire)
+            task.spawn(function()
+                for _, v in ipairs(Workspace:GetDescendants()) do
+                    if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") then
+                        v.Enabled = false
+                    end
+                end
+            end)
+
+            -- 5. Force garbage collection to clean up memory leaks and reduce RAM usage
+            collectgarbage("collect")
+        else
+            -- Restore default rendering & lighting behavior when toggled off
+            RunService:Set3dRenderingEnabled(true)
+            if blackScreen then blackScreen.Visible = false end
+            UserGameSettings.SavedQualityLevel = Enum.SavedQualityLevel.Level10
+            Lighting.GlobalShadows = true
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") then
+                    v.Enabled = true
+                end
+            end
+        end
+    end)
+end
+
 -- ==================== REVAMPED WEBHOOK ====================
 local httpRequest = request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
 
@@ -314,6 +361,8 @@ local function sendAppleWareWebhook(title, description, fields, color)
         ping = "<@" .. settingsConfig.discordUserId .. ">"
     end
 
+    local imageUrl = "YOUR_IMAGE_URL_HERE"
+
     local embed = {
         title = "⚡ " .. title,
         description = description,
@@ -321,7 +370,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
         fields = fields or {},
         author = {
             name = "AWhub Automation Suite",
-            icon_url = "https://i.imgur.com/83pZ7wA.png"
+            icon_url = imageUrl
         },
         footer = {
             text = "https://applewareh.vercel.app • " .. os.date("%H:%M:%S")
@@ -332,7 +381,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
     local data = {
         content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
         username = "AWhub Bot",
-        avatar_url = "https://i.imgur.com/83pZ7wA.png",
+        avatar_url = imageUrl,
         embeds = {embed}
     }
 
@@ -712,10 +761,11 @@ local function buildUI()
                 Position = state[key] and UDim2.new(1, -16 * selectedScale, 0.5, -7 * selectedScale) or UDim2.new(0, 2 * selectedScale, 0.5, -7 * selectedScale),
                 BackgroundColor3 = state[key] and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
             }):Play()
+            
             if key == "disable3d" then
-                RunService:Set3dRenderingEnabled(not state.disable3d)
-                if blackScreen then blackScreen.Visible = state.disable3d end
+                applyLowDeviceOptimizations(state.disable3d)
             end
+            
             saveSettings()
         end)
     end
@@ -863,8 +913,7 @@ end
 buildUI()
 
 if state.disable3d then
-    RunService:Set3dRenderingEnabled(false)
-    if blackScreen then blackScreen.Visible = true end
+    applyLowDeviceOptimizations(true)
 end
 
 local function alive()
@@ -1257,4 +1306,4 @@ task.spawn(function()
     end)
 end)
 
-print("AWhub loaded - enjoy my script (made by word) and also fuck you but enjoy your day :)")
+print("AWhub loaded - enjoy my script (made by word) and also fuck you but enjoy your day")
