@@ -33,11 +33,13 @@ local function getGuiParent()
             syn.protect_gui(container)
             container.Parent = CoreGui
             return container
+        elseif CoreGui:FindFirstChild("RobloxGui") then
+            return CoreGui
         end
-        return CoreGui
+        return LP:WaitForChild("PlayerGui", 5)
     end)
     if success and gui then return gui end
-    return LP:WaitForChild("PlayerGui", 5) or CoreGui
+    return LP:FindFirstChild("PlayerGui") or CoreGui
 end
 
 -- ==================== WATERPROOF SYSTEM (NICOLAS) ====================
@@ -371,6 +373,11 @@ end
 local st
 local blackScreen = nil
 
+local function alive()
+    local c = LP.Character
+    return c and c:FindFirstChild("Humanoid") and c.Humanoid.Health > 0 and c:FindFirstChild("HumanoidRootPart")
+end
+
 local function standUp()
     local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
     local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
@@ -391,7 +398,7 @@ local function hideSky()
     local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
     if hum then hum.PlatformStand = true end
     if root then
-        root.Anchored = true -- Anchor to prevent falling into the void
+        root.Anchored = true
         root.CFrame = HIDE_POS
         root.AssemblyLinearVelocity = Vector3.zero
         root.AssemblyAngularVelocity = Vector3.zero
@@ -463,7 +470,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
     }
 
     local data = {
-        content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
+        content = ping ~= "" and (ping .. " 🖕 Status update report:") or nil,
         username = "AWhub Bot",
         embeds = {embed},
         allowed_mentions = {
@@ -692,6 +699,83 @@ local function serverHop()
             TeleportService:Teleport(game.PlaceId, LP)
         end
     end)
+end
+
+-- ==================== COMBAT / UTILITY FUNCTIONS ====================
+local function findTool(name)
+    local char, bp = LP.Character, LP:FindFirstChild("Backpack")
+    if char and char:FindFirstChild(name) then return char[name] end
+    if bp and bp:FindFirstChild(name) then return bp[name] end
+    return nil
+end
+
+local function equipTool(name)
+    local char = LP.Character
+    local bp = LP:FindFirstChild("Backpack")
+    if not char then return nil end
+    
+    local existing = char:FindFirstChild(name)
+    if existing then return existing end
+    
+    local tool = bp and bp:FindFirstChild(name)
+    if tool then
+        pcall(function()
+            tool.Parent = char
+        end)
+        task.wait(0.15)
+        return char:FindFirstChild(name)
+    end
+    return nil
+end
+
+local function getRole()
+    if findTool("Knife") then return "Murderer" end
+    if findTool("Gun") then return "Sheriff" end
+    return "Innocent"
+end
+
+local function autoKillAllPlayers()
+    standUp()
+    task.wait(0.1)
+    local knife = equipTool("Knife")
+    if not knife then
+        for i = 1, 10 do
+            task.wait(0.15)
+            knife = equipTool("Knife")
+            if knife then break end
+        end
+    end
+    if not knife then return end
+
+    local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LP and plr.Character then
+            local tHum = plr.Character:FindFirstChildOfClass("Humanoid")
+            local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
+            if tHum and tHum.Health > 0 and tRoot then
+                local tStart = tick()
+                while tick() - tStart < 1.5 and tHum.Health > 0 and tRoot.Parent and myRoot.Parent and alive() do
+                    if knife.Parent ~= LP.Character then knife.Parent = LP.Character end
+                    myRoot.CFrame = tRoot.CFrame * CFrame.new(0, 0, 2.2)
+                    myRoot.AssemblyLinearVelocity = Vector3.zero
+                    myRoot.AssemblyAngularVelocity = Vector3.zero
+
+                    pcall(function() knife:Activate() end)
+                    pcall(function()
+                        for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
+                            if v:IsA("RemoteEvent") and (string.lower(v.Name):find("knife") or string.lower(v.Name):find("hit") or string.lower(v.Name):find("stab") or string.lower(v.Name):find("kill")) then
+                                v:FireServer(tRoot.Position)
+                            end
+                        end
+                    end)
+                    task.wait(0.05)
+                end
+            end
+        end
+    end
+    hideSky()
 end
 
 -- ==================== UI ====================
@@ -1002,36 +1086,6 @@ if state.disable3d then
     applyLowDeviceOptimizations(true)
 end
 
-local function alive()
-    local c = LP.Character
-    return c and c:FindFirstChild("Humanoid") and c.Humanoid.Health > 0 and c:FindFirstChild("HumanoidRootPart")
-end
-
-local function findTool(name)
-    local char, bp = LP.Character, LP:FindFirstChild("Backpack")
-    if char and char:FindFirstChild(name) then return char[name] end
-    if bp and bp:FindFirstChild(name) then return bp[name] end
-end
-
-local function equipTool(name)
-    local char = LP.Character
-    local bp = LP:FindFirstChild("Backpack")
-    if not char then return end
-    if char:FindFirstChild(name) then return char[name] end
-    local tool = bp and bp:FindFirstChild(name)
-    if tool then
-        tool.Parent = char
-        task.wait(0.12)
-        return char:FindFirstChild(name)
-    end
-end
-
-local function getRole()
-    if findTool("Knife") then return "Murderer" end
-    if findTool("Gun") then return "Sheriff" end
-    return "Innocent"
-end
-
 local function getCoins()
     local coins = {}
     for _, map in ipairs(Workspace:GetChildren()) do
@@ -1073,68 +1127,39 @@ local function runBagFullAction()
     if busy or not hasCollectedThisRound then return end
     if not bagFull and currentCoinCount < MIN_BAG_FULL then return end
 
-    busy = true
-    isExecutingAction = true
-    cancelFarmTween()
-    bagFull = true
-    standUp()
-
-    totalCoinsEarned = totalCoinsEarned + currentCoinCount
-
     local role = getRole()
     
-    if state.autoKillAll and role == "Murderer" then
-        if st then st.Text = " [AWhub] Bag full (40)! Bringing everyone to hidpos..." end
-        
-        local knife = equipTool("Knife")
-        local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            root.Anchored = true
-            root.CFrame = HIDE_POS
-            root.AssemblyLinearVelocity = Vector3.zero
-            root.AssemblyAngularVelocity = Vector3.zero
-        end
-        
-        task.wait(0.2)
-        
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= LP and plr.Character then
-                local pRoot = plr.Character:FindFirstChild("HumanoidRootPart")
-                local pHum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if pRoot and pHum and pHum.Health > 0 then
-                    pcall(function()
-                        pRoot.CFrame = HIDE_POS + Vector3.new(math.random(-2,2), 0, math.random(-2,2))
-                        pRoot.AssemblyLinearVelocity = Vector3.zero
-                    end)
-                end
-            end
-        end
-        
-        task.wait(0.3)
-        
+    -- ONLY trigger the action/hiding loop if you are actually the Murderer and have Auto Kill All enabled
+    if role == "Murderer" then
+        busy = true
+        isExecutingAction = true
+        cancelFarmTween()
+        bagFull = true
+        standUp()
+
+        totalCoinsEarned = totalCoinsEarned + currentCoinCount
+
         pcall(function()
-            if knife and knife.Parent == LP.Character then
-                for _ = 1, 3 do
-                    knife:Activate()
-                    task.wait(0.1)
-                end
+            if state.autoKillAll then
+                if st then st.Text = " [AWhub] Executing Auto Kill All..." end
+                autoKillAllPlayers()
+                task.wait(0.5)
             end
-        end)
-    else
-        pcall(function()
-            if (role == "Murderer" and state.autoResetMurderer)
-                or (role == "Sheriff" and state.autoResetSheriff)
-                or (role == "Innocent" and state.autoResetInnocent) then
+            if state.autoResetMurderer then
                 triggerMenuReset()
                 task.wait(1.5)
             end
         end)
-        hideSky()
-    end
 
-    busy = false
-    isExecutingAction = false
-    bagFull = false
+        hideSky()
+        busy = false
+        isExecutingAction = false
+        bagFull = false
+    else
+        -- If you are Sheriff or Innocent, just reset or ignore the bag full trigger so it doesn't loop
+        bagFull = false
+        currentCoinCount = 0
+    end
 end
 
 -- Coin remote
