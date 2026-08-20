@@ -1,5 +1,5 @@
 -- ====================================================================
--- Appleware - ok pls no steal
+-- AWhub - ok pls no steal
 -- ====================================================================
 
 local Players = game:GetService("Players")
@@ -40,8 +40,108 @@ local function getGuiParent()
     return LP:WaitForChild("PlayerGui", 5) or CoreGui
 end
 
+-- ==================== WATERPROOF SYSTEM (NICOLAS) ====================
+local table_insert = table.insert
+
+local nicolas = {}
+nicolas.__index = nicolas
+
+function nicolas.new()
+    return setmetatable({_tasks = {}, _destroyed = false}, nicolas)
+end
+
+function nicolas:GiveTask(task)
+    if self._destroyed then
+        self:_cleanupTask(task)
+        return
+    end
+    table_insert(self._tasks, task)
+    return task
+end
+
+function nicolas:GiveTasks(...)
+    for _, task in ipairs({...}) do
+        self:GiveTask(task)
+    end
+end
+
+function nicolas:_cleanupTask(task)
+    local taskType = typeof(task)
+    if taskType == "RBXScriptConnection" then
+        task:Disconnect()
+    elseif taskType == "Instance" then
+        task:Destroy()
+    elseif taskType == "function" then
+        task()
+    elseif taskType == "table" and type(task.Destroy) == "function" then
+        task:Destroy()
+    end
+end
+
+function nicolas:DoCleaning()
+    if self._destroyed then return end
+    self._destroyed = true
+    for _, task in ipairs(self._tasks) do
+        self:_cleanupTask(task)
+    end
+    self._tasks = {}
+end
+
+function nicolas:Destroy()
+    self:DoCleaning()
+end
+
+local waterMaid = nil
+local modifiedParts = {}
+
+local function DisableWaterPart(part)
+    if part and part:IsA("BasePart") then
+        if not modifiedParts[part] then
+            modifiedParts[part] = {
+                CanTouch = part.CanTouch,
+                CanCollide = part.CanCollide,
+            }
+        end
+        part.CanTouch = false
+        part.CanCollide = false
+    end
+end
+
+local function CheckMaps()
+    local yacht = Workspace:FindFirstChild("Yacht")
+    if yacht then
+        local intereactive = yacht:FindFirstChild("Intereactive")
+        if intereactive then
+            local water = intereactive:FindFirstChild("Water")
+            if water then
+                DisableWaterPart(water:FindFirstChild("WaterPart"))
+            end
+        end
+    end
+    
+    local pier = Workspace:FindFirstChild("Pier")
+    if pier then
+        DisableWaterPart(pier:FindFirstChild("Respawn"))
+    end
+end
+
+local function enableWaterImmunity()
+    if waterMaid then
+        waterMaid:DoCleaning()
+        waterMaid = nil
+    end
+    
+    waterMaid = nicolas.new()
+    CheckMaps()
+    
+    waterMaid:GiveTask(Workspace.DescendantAdded:Connect(CheckMaps))
+    waterMaid:GiveTask(Workspace.DescendantRemoved:Connect(CheckMaps))
+end
+
+task.spawn(enableWaterImmunity)
+
 -- ==================== DEVICE SELECTION PROMPT ====================
-local selectedScale = 1 -- Default Mobile scale
+local selectedScale = 1 
 local promptLoaded = false
 
 local function promptDeviceSelection()
@@ -291,6 +391,7 @@ local function hideSky()
     local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
     if hum then hum.PlatformStand = true end
     if root then
+        root.Anchored = true -- Anchor to prevent falling into the void
         root.CFrame = HIDE_POS
         root.AssemblyLinearVelocity = Vector3.zero
         root.AssemblyAngularVelocity = Vector3.zero
@@ -339,7 +440,7 @@ local function applyLowDeviceOptimizations(enabled)
     end)
 end
 
--- ==================== FIXED WEBHOOK SYSTEM ====================
+-- ==================== WEBHOOK SYSTEM ====================
 local httpRequest = request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
 
 local function sendAppleWareWebhook(title, description, fields, color)
@@ -364,7 +465,10 @@ local function sendAppleWareWebhook(title, description, fields, color)
     local data = {
         content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
         username = "AWhub Bot",
-        embeds = {embed}
+        embeds = {embed},
+        allowed_mentions = {
+            parse = {"users"}
+        }
     }
 
     pcall(function()
@@ -393,16 +497,12 @@ local function sendStatusWebhook()
         timeFormatted = string.format("%dm %ds", minutes, seconds)
     end
 
-    local currentCoins = currentCoinCount or 0
-    local maxCoins = maxCoinCount or 40
-    local totalHarvested = totalCoinsEarned or 0
-
     sendAppleWareWebhook(
         "Session Progress Report",
         "Update for " .. tostring(LP.Name),
         {
             {name = "👤 User Profile", value = "`" .. tostring(LP.Name) .. "`\nID: `" .. tostring(LP.UserId) .. "`", inline = true},
-            {name = "💰 Coin Statistics", value = "Bag Capacity: **" .. tostring(currentCoins) .. "/" .. tostring(maxCoins) .. "**\nTotal Harvested: **" .. tostring(totalHarvested) .. " 🪙**", inline = true},
+            {name = "💰 Coin Statistics", value = "Bag Capacity: **" .. tostring(currentCoinCount) .. "/" .. tostring(maxCoinCount) .. "**\nTotal Harvested: **" .. tostring(totalCoinsEarned) .. " 🪙**", inline = true},
             {name = "⏱️ Performance", value = "Active Time: **" .. timeFormatted .. "**\nHarvest Rate: **" .. tostring(rate) .. " coins/hr**", inline = false},
             {name = "🌐 Server Details", value = "Place ID: `" .. tostring(game.PlaceId) .. "`\nJob ID: `" .. tostring(game.JobId) .. "`", inline = false}
         },
@@ -458,6 +558,7 @@ local function restoreSelf(character, savedData, originalDestroyHeight)
         return
     end
     Workspace.FallenPartsDestroyHeight = originalDestroyHeight
+    rootPart.Anchored = false
     rootPart.CFrame = savedData.cframe
     rootPart.AssemblyLinearVelocity = Vector3.zero
     rootPart.AssemblyAngularVelocity = Vector3.zero
@@ -495,6 +596,7 @@ local function VoidReset(TargetPlayer)
     local originalDestroyHeight = Workspace.FallenPartsDestroyHeight
     Workspace.FallenPartsDestroyHeight = -math.huge
     Humanoid.PlatformStand = true
+    RootPart.Anchored = false
     lockSelf(RootPart, savedCF)
 
     local bv = Instance.new("BodyVelocity")
@@ -987,6 +1089,7 @@ local function runBagFullAction()
         local knife = equipTool("Knife")
         local root = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
         if root then
+            root.Anchored = true
             root.CFrame = HIDE_POS
             root.AssemblyLinearVelocity = Vector3.zero
             root.AssemblyAngularVelocity = Vector3.zero
@@ -1110,6 +1213,7 @@ task.spawn(function()
         if (state.xpFarm and not isExecutingAction) or isLobby() then
             cancelFarmTween()
             humanoid.PlatformStand = true
+            root.Anchored = true
             root.CFrame = HIDE_POS
             root.AssemblyLinearVelocity = Vector3.zero
             continue
@@ -1118,11 +1222,13 @@ task.spawn(function()
         if bagFull or isExecutingAction then
             cancelFarmTween()
             humanoid.PlatformStand = true
+            root.Anchored = true
             root.CFrame = HIDE_POS
             root.AssemblyLinearVelocity = Vector3.zero
             continue
         end
 
+        root.Anchored = false
         humanoid.PlatformStand = true
         humanoid.AutoRotate = false
         root.AssemblyLinearVelocity = Vector3.zero
@@ -1287,4 +1393,4 @@ task.spawn(function()
     end)
 end)
 
-print("Appleware loaded - enjoy the script but fuck you (made by word)")
+print("Appleware loaded - enjoy my script also fuck you but have a good day (made hy word)")
