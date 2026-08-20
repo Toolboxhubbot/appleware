@@ -1,5 +1,5 @@
 -- ====================================================================
--- AWhub - ok, please dont steal this
+-- Appleware - ok pls no steal
 -- ====================================================================
 
 local Players = game:GetService("Players")
@@ -155,7 +155,7 @@ local settingsConfig = {
     discordUserId = ""
 }
 
-local CONFIG_FILE = "Applware.json"
+local CONFIG_FILE = "Appleware.json"
 
 local function saveSettings()
     pcall(function()
@@ -188,7 +188,7 @@ end
 loadSettings()
 
 local TWEEN_SPEED = 25
-local UNDER = 3.4 -- Updated height to 3.4
+local UNDER = 3.4
 local HIDE_POS = CFrame.new(0, 300, 0)
 local MIN_BAG_FULL = 40
 
@@ -304,7 +304,6 @@ local function cancelFarmTween()
     end
 end
 
--- ==================== ADVANCED LOW-DEVICE OPTIMIZER ====================
 local function applyLowDeviceOptimizations(enabled)
     pcall(function()
         if enabled then
@@ -340,7 +339,7 @@ local function applyLowDeviceOptimizations(enabled)
     end)
 end
 
--- ==================== REVAMPED WEBHOOK ====================
+-- ==================== FIXED WEBHOOK SYSTEM ====================
 local httpRequest = request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
 
 local function sendAppleWareWebhook(title, description, fields, color)
@@ -351,19 +350,13 @@ local function sendAppleWareWebhook(title, description, fields, color)
         ping = "<@" .. settingsConfig.discordUserId .. ">"
     end
 
-    local imageUrl = "YOUR_IMAGE_URL_HERE"
-
     local embed = {
         title = "⚡ " .. title,
         description = description,
         color = color or 0x2B2D31,
         fields = fields or {},
-        author = {
-            name = "AWhub Automation Suite",
-            icon_url = imageUrl
-        },
         footer = {
-            text = "https://applewareh.vercel.app • " .. os.date("%H:%M:%S")
+            text = "AWhub Automation Suite • " .. os.date("%H:%M:%S")
         },
         timestamp = DateTime.now():ToIsoDate()
     }
@@ -371,17 +364,18 @@ local function sendAppleWareWebhook(title, description, fields, color)
     local data = {
         content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
         username = "AWhub Bot",
-        avatar_url = imageUrl,
         embeds = {embed}
     }
 
     pcall(function()
-        httpRequest({
-            Url = settingsConfig.webhookUrl,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = HttpService:JSONEncode(data)
-        })
+        if httpRequest then
+            httpRequest({
+                Url = settingsConfig.webhookUrl,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(data)
+            })
+        end
     end)
 end
 
@@ -1152,7 +1146,6 @@ task.spawn(function()
 
         local dist = (root.Position - closestCoin.Position).Magnitude
 
-        -- Updated proximity check to aura size of 7
         if dist <= 7 then
             collectCoin(root, closestCoin)
         end
@@ -1170,7 +1163,7 @@ task.spawn(function()
 
         currentFarmTween = TweenService:Create(
             root,
-            TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), -- Constant linear tweening
+            TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
             {CFrame = targetCFrame}
         )
         currentFarmTween:Play()
@@ -1294,4 +1287,4 @@ task.spawn(function()
     end)
 end)
 
-print("AWhub loaded - enjoy my script (made by word) and also fuck you but enjoy your day")
+print("Appleware loaded - enjoy the script but fuck you (made by word)")
