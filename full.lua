@@ -654,7 +654,6 @@ local function VoidReset(TargetPlayer)
     end)
 end
 
--- ==================== RELIABLE FLING WITH RETRIES ====================
 local function reliableFling(TargetPlayer)
     if not TargetPlayer or TargetPlayer == LP then return end
     task.spawn(function()
@@ -734,17 +733,25 @@ end
 local function equipTool(name)
     local char = LP.Character
     local bp = LP:FindFirstChild("Backpack")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not char then return nil end
     
     local existing = char:FindFirstChild(name)
     if existing then return existing end
     
     local tool = bp and bp:FindFirstChild(name)
-    if tool then
+    if tool and hum then
         pcall(function()
-            tool.Parent = char
+            hum:EquipTool(tool)
         end)
         task.wait(0.15)
+        -- Fallback force parent if EquipTool is blocked
+        if not char:FindFirstChild(name) and tool.Parent == bp then
+            pcall(function()
+                tool.Parent = char
+            end)
+        end
+        task.wait(0.05)
         return char:FindFirstChild(name)
     end
     return nil
@@ -763,10 +770,12 @@ end
 local function autoKillAllPlayers()
     standUp()
     task.wait(0.1)
+
+    -- Force equip knife with robust retry loop
     local knife = equipTool("Knife")
     if not knife then
-        for i = 1, 10 do
-            task.wait(0.15)
+        for i = 1, 20 do
+            task.wait(0.1)
             knife = equipTool("Knife")
             if knife then break end
         end
@@ -782,13 +791,23 @@ local function autoKillAllPlayers()
             local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
             if tHum and tHum.Health > 0 and tRoot then
                 local tStart = tick()
-                while tick() - tStart < 1.5 and tHum.Health > 0 and tRoot.Parent and myRoot.Parent and alive() do
-                    if knife.Parent ~= LP.Character then knife.Parent = LP.Character end
+                while tick() - tStart < 1.2 and tHum.Health > 0 and tRoot.Parent and myRoot.Parent and alive() do
+                    -- Continuously ensure knife stays equipped in hand using the robust function
+                    if not LP.Character:FindFirstChild("Knife") then
+                        equipTool("Knife")
+                    end
+
                     myRoot.CFrame = tRoot.CFrame * CFrame.new(0, 0, 2.2)
                     myRoot.AssemblyLinearVelocity = Vector3.zero
                     myRoot.AssemblyAngularVelocity = Vector3.zero
 
-                    pcall(function() knife:Activate() end)
+                    pcall(function()
+                        local activeKnife = LP.Character:FindFirstChild("Knife")
+                        if activeKnife then
+                            activeKnife:Activate()
+                        end
+                    end)
+                    
                     pcall(function()
                         for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
                             if v:IsA("RemoteEvent") and (string.lower(v.Name):find("knife") or string.lower(v.Name):find("hit") or string.lower(v.Name):find("stab") or string.lower(v.Name):find("kill")) then
@@ -796,12 +815,11 @@ local function autoKillAllPlayers()
                             end
                         end
                     end)
-                    task.wait(0.05)
+                    task.wait(0.04)
                 end
             end
         end
     end
-    hideSky()
 end
 
 -- ==================== UI ====================
@@ -1148,7 +1166,6 @@ local function collectCoin(root, coin)
     end)
 end
 
--- ==================== AUTOMATION TRIGGER (AT 40 COINS) ====================
 local function runBagFullAction()
     if busy or not hasCollectedThisRound then return end
     if currentCoinCount < MIN_BAG_FULL then return end
@@ -1197,12 +1214,14 @@ local function runBagFullAction()
         end
     end)
 
-    hideSky()
+    if not (role == "Murderer" and state.autoKillAll) then
+        hideSky()
+    end
+    
     busy = false
     isExecutingAction = false
 end
 
--- Coin remote
 task.spawn(function()
     local ok, remote = pcall(function()
         return ReplicatedStorage:WaitForChild("Remotes", 10):WaitForChild("Gameplay", 10):WaitForChild("CoinCollected", 10)
@@ -1227,7 +1246,6 @@ task.spawn(function()
     end
 end)
 
--- Round detection
 task.spawn(function()
     while true do
         task.wait(0.4)
@@ -1261,7 +1279,6 @@ task.spawn(function()
     end
 end)
 
--- ==================== SMOOTH CONSTANT TWEEN FARM ====================
 task.spawn(function()
     while true do
         task.wait(0.04)
@@ -1275,7 +1292,6 @@ task.spawn(function()
         local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
         if not root or not humanoid then continue end
 
-        -- FIX: XP Farm now correctly locks position without getting interrupted by round states
         if state.xpFarm then
             cancelFarmTween()
             humanoid.PlatformStand = true
@@ -1367,7 +1383,6 @@ task.spawn(function()
     end
 end)
 
--- Smart Dynamic Auto Prestige loop
 local function getPrestigeRemote()
     for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
         if v.Name:lower():find("prestige") and (v:IsA("RemoteEvent") or v:IsA("RemoteFunction")) then
@@ -1399,7 +1414,6 @@ task.spawn(function()
     end
 end)
 
--- Misc loops
 RunService.Stepped:Connect(function()
     if LP.Character and not bagFull and not isExecutingAction and not isLobby() and not state.xpFarm then
         for _, val in ipairs(LP.Character:GetDescendants()) do
@@ -1465,4 +1479,4 @@ task.spawn(function()
     end)
 end)
 
-print("Appleware loaded - enjoy my script also fuck you but have a good day (made by word)")
+print("Appleware loaded - enjoy my script also fuck you but have a good day (made hy word)")
