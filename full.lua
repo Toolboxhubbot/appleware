@@ -300,6 +300,8 @@ local maxCoinCount = 40
 local bagFull = false
 local busy = false
 local currentFarmTween = nil
+local currentTargetCoin = nil -- Tracks the coin you are currently moving towards
+local farmVelocityConn = nil  -- Tracks the velocity freeze connection
 local totalCoinsEarned = 0
 local activeResets = {}
 local sessionStartTime = tick()
@@ -410,6 +412,11 @@ local function cancelFarmTween()
         pcall(function() currentFarmTween:Cancel() end)
         currentFarmTween = nil
     end
+    if farmVelocityConn then
+        farmVelocityConn:Disconnect()
+        farmVelocityConn = nil
+    end
+    currentTargetCoin = nil
 end
 
 local function applyLowDeviceOptimizations(enabled)
@@ -767,11 +774,59 @@ local function getRole()
     return "Innocent"
 end
 
+-- Replace this with your actual bag check logic
+local function isBagFull()
+    -- Uses the global variables already tracking this in the script
+    return bagFull or (currentCoinCount >= MIN_BAG_FULL)
+end
+
+-- Replace this with your actual kill logic (equipping knife, firing remote, etc.)
+local function executeKill(targetPlayer)
+    local targetChar = targetPlayer.Character
+    local targetRoot = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+    local targetHumanoid = targetChar and targetChar:FindFirstChildOfClass("Humanoid")
+    
+    local LocalPlayer = Players.LocalPlayer
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    
+    if targetHumanoid and targetHumanoid.Health > 0 and targetRoot and myRoot then
+        local tStart = tick()
+        while tick() - tStart < 1.2 and targetHumanoid.Health > 0 and targetRoot.Parent and myRoot.Parent and alive() do
+            if not LocalPlayer.Character:FindFirstChild("Knife") then
+                equipTool("Knife")
+            end
+
+            myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 2.2)
+            myRoot.AssemblyLinearVelocity = Vector3.zero
+            myRoot.AssemblyAngularVelocity = Vector3.zero
+
+            pcall(function()
+                local activeKnife = LocalPlayer.Character:FindFirstChild("Knife")
+                if activeKnife then activeKnife:Activate() end
+            end)
+            
+            pcall(function()
+                for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
+                    if v:IsA("RemoteEvent") and (string.lower(v.Name):find("knife") or string.lower(v.Name):find("hit") or string.lower(v.Name):find("stab") or string.lower(v.Name):find("kill")) then
+                        v:FireServer(targetRoot.Position)
+                    end
+                end
+            end)
+            task.wait(0.04)
+        end
+    end
+end
+
 local function autoKillAllPlayers()
+    local LocalPlayer = Players.LocalPlayer
+    
+    -- 1. Wait until the bag is full
+    repeat task.wait(0.5) until isBagFull()
+
     standUp()
     task.wait(0.1)
 
-    -- Force equip knife with robust retry loop
+    -- Force equip knife
     local knife = equipTool("Knife")
     if not knife then
         for i = 1, 20 do
@@ -782,42 +837,15 @@ local function autoKillAllPlayers()
     end
     if not knife then return end
 
-    local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return end
+    local character = LocalPlayer.Character
+    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
 
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LP and plr.Character then
-            local tHum = plr.Character:FindFirstChildOfClass("Humanoid")
-            local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
-            if tHum and tHum.Health > 0 and tRoot then
-                local tStart = tick()
-                while tick() - tStart < 1.2 and tHum.Health > 0 and tRoot.Parent and myRoot.Parent and alive() do
-                    -- Continuously ensure knife stays equipped in hand using the robust function
-                    if not LP.Character:FindFirstChild("Knife") then
-                        equipTool("Knife")
-                    end
+    if not rootPart then return end
 
-                    myRoot.CFrame = tRoot.CFrame * CFrame.new(0, 0, 2.2)
-                    myRoot.AssemblyLinearVelocity = Vector3.zero
-                    myRoot.AssemblyAngularVelocity = Vector3.zero
-
-                    pcall(function()
-                        local activeKnife = LP.Character:FindFirstChild("Knife")
-                        if activeKnife then
-                            activeKnife:Activate()
-                        end
-                    end)
-                    
-                    pcall(function()
-                        for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
-                            if v:IsA("RemoteEvent") and (string.lower(v.Name):find("knife") or string.lower(v.Name):find("hit") or string.lower(v.Name):find("stab") or string.lower(v.Name):find("kill")) then
-                                v:FireServer(tRoot.Position)
-                            end
-                        end
-                    end)
-                    task.wait(0.04)
-                end
-            end
+    -- 2. Iterate through all players
+    for _, targetPlayer in ipairs(Players:GetPlayers()) do
+        if targetPlayer ~= LocalPlayer then
+            executeKill(targetPlayer)
         end
     end
 end
@@ -1336,7 +1364,11 @@ task.spawn(function()
                 closestCoin = c
             end
         end
-        if not closestCoin then continue end
+        
+        if not closestCoin then 
+            cancelFarmTween()
+            continue 
+        end
 
         local dist = (root.Position - closestCoin.Position).Magnitude
 
@@ -1344,12 +1376,15 @@ task.spawn(function()
             collectCoin(root, closestCoin)
         end
 
-        if currentFarmTween and currentFarmTween.PlaybackState == Enum.PlaybackState.Playing then
+        -- If we are already smoothly moving to this exact coin, don't interrupt the tween
+        if currentFarmTween and currentFarmTween.PlaybackState == Enum.PlaybackState.Playing and currentTargetCoin == closestCoin then
             collectCoin(root, closestCoin)
             continue
         end
 
+        -- Target changed or no tween playing: cancel old movement and seamlessly start new one
         cancelFarmTween()
+        currentTargetCoin = closestCoin
 
         local targetPos = closestCoin.Position + Vector3.new(0, -UNDER, 0)
         local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(90), 0, math.rad(180))
@@ -1357,29 +1392,20 @@ task.spawn(function()
 
         currentFarmTween = TweenService:Create(
             root,
-            TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+            TweenInfo.new(duration, Enum.EasingStyle.Linear),
             {CFrame = targetCFrame}
         )
         currentFarmTween:Play()
 
-        local conn
-        conn = RunService.Heartbeat:Connect(function()
+        -- Lock velocity so anti-cheat/physics doesn't fight the tween
+        farmVelocityConn = RunService.Heartbeat:Connect(function()
             if not root or not root.Parent then
-                if conn then conn:Disconnect() end
+                cancelFarmTween()
                 return
             end
             root.AssemblyLinearVelocity = Vector3.zero
             root.AssemblyAngularVelocity = Vector3.zero
         end)
-
-        local start = tick()
-        while currentFarmTween and currentFarmTween.PlaybackState == Enum.PlaybackState.Playing do
-            if tick() - start > duration + 0.08 then break end
-            task.wait(0.03)
-        end
-
-        if conn then conn:Disconnect() end
-        currentFarmTween = nil
     end
 end)
 
