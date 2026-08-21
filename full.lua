@@ -289,7 +289,7 @@ local function loadSettings()
 end
 loadSettings()
 
-local TWEEN_SPEED = 25
+local TWEEN_SPEED = 23
 local UNDER = 3.4
 local HIDE_POS = CFrame.new(0, 300, 0)
 local MIN_BAG_FULL = 40
