@@ -522,7 +522,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
 
     local data = {
         content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
-        username = "AppleWare",
+        username = "AWhub Bot",
         embeds = {embed},
         allowed_mentions = {
             parse = {"users"}
