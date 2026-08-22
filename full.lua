@@ -1,5 +1,5 @@
 -- ====================================================================
--- AWhub - ok pls no steal
+-- AWhub - ok pls no steal (Updated)
 -- ====================================================================
 
 local Players = game:GetService("Players")
@@ -12,6 +12,7 @@ local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 local TeleportService = game:GetService("TeleportService")
 local Lighting = game:GetService("Lighting")
+local GuiService = game:GetService("GuiService")
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
 
 local LP = Players.LocalPlayer
@@ -289,7 +290,7 @@ local function loadSettings()
 end
 loadSettings()
 
-local TWEEN_SPEED = 24
+local TWEEN_SPEED = 24.5
 local UNDER = 3.4
 local HIDE_POS = CFrame.new(0, 300, 0)
 local MIN_BAG_FULL = 40
@@ -300,8 +301,8 @@ local maxCoinCount = 40
 local bagFull = false
 local busy = false
 local currentFarmTween = nil
-local currentTargetCoin = nil -- Tracks the coin you are currently moving towards
-local farmVelocityConn = nil  -- Tracks the velocity freeze connection
+local currentTargetCoin = nil
+local farmVelocityConn = nil
 local totalCoinsEarned = 0
 local activeResets = {}
 local sessionStartTime = tick()
@@ -335,6 +336,49 @@ local function getCachedRoleData()
     end
     roleCache.timestamp = now
     return roleCache.data
+end
+
+local function findTool(name)
+    local char, bp = LP.Character, LP:FindFirstChild("Backpack")
+    if char and char:FindFirstChild(name) then return char[name] end
+    if bp and bp:FindFirstChild(name) then return bp[name] end
+    return nil
+end
+
+local function equipTool(name)
+    local char = LP.Character
+    local bp = LP:FindFirstChild("Backpack")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not char then return nil end
+    
+    local existing = char:FindFirstChild(name)
+    if existing then return existing end
+    
+    local tool = bp and bp:FindFirstChild(name)
+    if tool and hum then
+        pcall(function()
+            hum:EquipTool(tool)
+        end)
+        task.wait(0.15)
+        if not char:FindFirstChild(name) and tool.Parent == bp then
+            pcall(function()
+                tool.Parent = char
+            end)
+        end
+        task.wait(0.05)
+        return char:FindFirstChild(name)
+    end
+    return nil
+end
+
+local function getRole()
+    local roleData = getCachedRoleData()
+    if roleData and roleData[LP.Name] and roleData[LP.Name].Role then
+        return roleData[LP.Name].Role
+    end
+    if findTool("Knife") then return "Murderer" end
+    if findTool("Gun") then return "Sheriff" end
+    return "Innocent"
 end
 
 local function getMurd()
@@ -478,7 +522,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
 
     local data = {
         content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
-        username = "AWhub Bot",
+        username = "AppleWare's bot",
         embeds = {embed},
         allowed_mentions = {
             parse = {"users"}
@@ -533,6 +577,16 @@ task.spawn(function()
         if state.sendOnFull and settingsConfig.webhookUrl ~= "" then
             sendStatusWebhook()
         end
+    end
+end)
+
+-- ==================== AUTO REJOIN SYSTEM ====================
+GuiService.ErrorMessageChanged:Connect(function()
+    if state.autoRejoin and GuiService:GetErrorMessage() ~= "" then
+        task.wait(1)
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, LP)
+        end)
     end
 end)
 
@@ -729,104 +783,20 @@ local function serverHop()
     end)
 end
 
--- ==================== COMBAT / UTILITY FUNCTIONS ====================
-local function findTool(name)
-    local char, bp = LP.Character, LP:FindFirstChild("Backpack")
-    if char and char:FindFirstChild(name) then return char[name] end
-    if bp and bp:FindFirstChild(name) then return bp[name] end
-    return nil
-end
-
-local function equipTool(name)
-    local char = LP.Character
-    local bp = LP:FindFirstChild("Backpack")
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if not char then return nil end
-    
-    local existing = char:FindFirstChild(name)
-    if existing then return existing end
-    
-    local tool = bp and bp:FindFirstChild(name)
-    if tool and hum then
-        pcall(function()
-            hum:EquipTool(tool)
-        end)
-        task.wait(0.15)
-        -- Fallback force parent if EquipTool is blocked
-        if not char:FindFirstChild(name) and tool.Parent == bp then
-            pcall(function()
-                tool.Parent = char
-            end)
-        end
-        task.wait(0.05)
-        return char:FindFirstChild(name)
-    end
-    return nil
-end
-
-local function getRole()
-    local roleData = getCachedRoleData()
-    if roleData and roleData[LP.Name] and roleData[LP.Name].Role then
-        return roleData[LP.Name].Role
-    end
-    if findTool("Knife") then return "Murderer" end
-    if findTool("Gun") then return "Sheriff" end
-    return "Innocent"
-end
-
--- Replace this with your actual bag check logic
+-- ==================== FIXED AUTO KILL (STAB INSTEAD OF FLING) ====================
 local function isBagFull()
-    -- Uses the global variables already tracking this in the script
     return bagFull or (currentCoinCount >= MIN_BAG_FULL)
-end
-
--- Replace this with your actual kill logic (equipping knife, firing remote, etc.)
-local function executeKill(targetPlayer)
-    local targetChar = targetPlayer.Character
-    local targetRoot = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
-    local targetHumanoid = targetChar and targetChar:FindFirstChildOfClass("Humanoid")
-    
-    local LocalPlayer = Players.LocalPlayer
-    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    
-    if targetHumanoid and targetHumanoid.Health > 0 and targetRoot and myRoot then
-        local tStart = tick()
-        while tick() - tStart < 1.2 and targetHumanoid.Health > 0 and targetRoot.Parent and myRoot.Parent and alive() do
-            if not LocalPlayer.Character:FindFirstChild("Knife") then
-                equipTool("Knife")
-            end
-
-            myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 2.2)
-            myRoot.AssemblyLinearVelocity = Vector3.zero
-            myRoot.AssemblyAngularVelocity = Vector3.zero
-
-            pcall(function()
-                local activeKnife = LocalPlayer.Character:FindFirstChild("Knife")
-                if activeKnife then activeKnife:Activate() end
-            end)
-            
-            pcall(function()
-                for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
-                    if v:IsA("RemoteEvent") and (string.lower(v.Name):find("knife") or string.lower(v.Name):find("hit") or string.lower(v.Name):find("stab") or string.lower(v.Name):find("kill")) then
-                        v:FireServer(targetRoot.Position)
-                    end
-                end
-            end)
-            task.wait(0.04)
-        end
-    end
 end
 
 local function autoKillAllPlayers()
     local LocalPlayer = Players.LocalPlayer
     
-    -- 1. Wait until the bag is full
     repeat task.wait(0.5) until isBagFull()
 
     standUp()
     task.wait(0.1)
 
-    -- Force equip knife
+    -- Reliable auto-equip knife
     local knife = equipTool("Knife")
     if not knife then
         for i = 1, 20 do
@@ -839,13 +809,47 @@ local function autoKillAllPlayers()
 
     local character = LocalPlayer.Character
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-
     if not rootPart then return end
 
-    -- 2. Iterate through all players
+    if st then st.Text = " [AWhub] Finished farming, hunting players..." end
+
     for _, targetPlayer in ipairs(Players:GetPlayers()) do
         if targetPlayer ~= LocalPlayer then
-            executeKill(targetPlayer)
+            local targetChar = targetPlayer.Character
+            local targetRoot = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+            local targetHumanoid = targetChar and targetChar:FindFirstChildOfClass("Humanoid")
+            
+            if targetHumanoid and targetHumanoid.Health > 0 and targetRoot and rootPart then
+                local tStart = tick()
+                while tick() - tStart < 1.5 and targetHumanoid.Health > 0 and targetRoot.Parent and rootPart.Parent and alive() do
+                    local activeKnife = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Knife")
+                    if not activeKnife then
+                        equipTool("Knife")
+                        activeKnife = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Knife")
+                    end
+
+                    -- Smoothly teleport right behind target without physics flinging
+                    rootPart.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 2.5)
+                    rootPart.AssemblyLinearVelocity = Vector3.zero
+                    rootPart.AssemblyAngularVelocity = Vector3.zero
+
+                    if activeKnife then
+                        pcall(function()
+                            activeKnife:Activate()
+                        end)
+                    end
+                    
+                    pcall(function()
+                        for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
+                            if v:IsA("RemoteEvent") and (string.lower(v.Name):find("knife") or string.lower(v.Name):find("hit") or string.lower(v.Name):find("stab") or string.lower(v.Name):find("kill")) then
+                                v:FireServer(targetRoot.Position)
+                            end
+                        end
+                    end)
+                    task.wait(0.05)
+                end
+                task.wait(1)
+            end
         end
     end
 end
@@ -1215,10 +1219,6 @@ local function runBagFullAction()
                 autoKillAllPlayers()
                 task.wait(0.5)
             end
-            if state.autoResetMurderer then
-                triggerMenuReset()
-                task.wait(1.5)
-            end
         else
             if state.autoFlingMur then
                 local mur = getMurd()
@@ -1231,14 +1231,6 @@ local function runBagFullAction()
                     isExecutingAction = true
                 end
             end
-
-            if role == "Innocent" and state.autoResetInnocent then
-                triggerMenuReset()
-                task.wait(1.5)
-            elseif role == "Sheriff" and state.autoResetSheriff then
-                triggerMenuReset()
-                task.wait(1.5)
-            end
         end
     end)
 
@@ -1249,6 +1241,28 @@ local function runBagFullAction()
     busy = false
     isExecutingAction = false
 end
+
+-- ==================== ROUND-END AUTO RESET SYSTEM ====================
+task.spawn(function()
+    local lastRoundActive = false
+    while true do
+        task.wait(0.5)
+        local currentInRound = isInRound()
+        if lastRoundActive and not currentInRound then
+            -- Round ended, perform role-based auto-resets if enabled
+            local currentRole = getRole()
+            task.wait(0.5)
+            if currentRole == "Murderer" and state.autoResetMurderer then
+                triggerMenuReset()
+            elseif currentRole == "Sheriff" and state.autoResetSheriff then
+                triggerMenuReset()
+            elseif currentRole == "Innocent" and state.autoResetInnocent then
+                triggerMenuReset()
+            end
+        end
+        lastRoundActive = currentInRound
+    end
+end)
 
 task.spawn(function()
     local ok, remote = pcall(function()
@@ -1376,13 +1390,11 @@ task.spawn(function()
             collectCoin(root, closestCoin)
         end
 
-        -- If we are already smoothly moving to this exact coin, don't interrupt the tween
         if currentFarmTween and currentFarmTween.PlaybackState == Enum.PlaybackState.Playing and currentTargetCoin == closestCoin then
             collectCoin(root, closestCoin)
             continue
         end
 
-        -- Target changed or no tween playing: cancel old movement and seamlessly start new one
         cancelFarmTween()
         currentTargetCoin = closestCoin
 
@@ -1397,7 +1409,6 @@ task.spawn(function()
         )
         currentFarmTween:Play()
 
-        -- Lock velocity so anti-cheat/physics doesn't fight the tween
         farmVelocityConn = RunService.Heartbeat:Connect(function()
             if not root or not root.Parent then
                 cancelFarmTween()
@@ -1505,4 +1516,8 @@ task.spawn(function()
     end)
 end)
 
-print("Appleware loaded - enjoy my script also fuck you but have a good day (made hy word)")
+print("Appleware loaded - enjoy my script also fuck you but have a good day (made by word) and i stole all your weapons
+    
+    
+    
+    joke")
