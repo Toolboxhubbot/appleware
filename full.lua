@@ -1,5 +1,5 @@
 -- ====================================================================
--- AWhub - ok pls no steal 
+-- AWhub - ok pls no steal
 -- ====================================================================
 
 local Players = game:GetService("Players")
@@ -290,7 +290,7 @@ local function loadSettings()
 end
 loadSettings()
 
-local TWEEN_SPEED = 24.5
+local TWEEN_SPEED = 24
 local UNDER = 3.4
 local HIDE_POS = CFrame.new(0, 300, 0)
 local MIN_BAG_FULL = 40
@@ -522,7 +522,7 @@ local function sendAppleWareWebhook(title, description, fields, color)
 
     local data = {
         content = ping ~= "" and (ping .. " 🔔 Status update report:") or nil,
-        username = "AppleWare's bot",
+        username = "AppleWare",
         embeds = {embed},
         allowed_mentions = {
             parse = {"users"}
@@ -1516,8 +1516,4 @@ task.spawn(function()
     end)
 end)
 
-print("Appleware loaded - enjoy my script also fuck you but have a good day (made by word) and i stole all your weapons
-    
-    
-    
-    joke")
+print("Appleware loaded - enjoy my script also fuck you but have a good day (made by word)")
