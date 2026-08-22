@@ -1,5 +1,5 @@
 -- ====================================================================
--- AWhub - ok pls no steal (Updated)
+-- AWhub - ok pls no steal 
 -- ====================================================================
 
 local Players = game:GetService("Players")
